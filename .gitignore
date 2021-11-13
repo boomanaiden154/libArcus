@@ -3,6 +3,7 @@ ArcusConfig.cmake
 ArcusConfigVersion.cmake
 cmake_install.cmake
 CPackSourceConfig.cmake
+cmake-build-*
 
 # Compiled Object files
 *.slo

@@ -19,8 +19,9 @@
 class SocketListener
 {
     %TypeHeaderCode
-    #include "SocketListener.h"
-    %End
+    #include "Arcus/SocketListener.h"
+
+%End
 
 public:
     SocketListener();

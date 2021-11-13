@@ -1,0 +1,16 @@
+project(PackageTest)
+cmake_minimum_required(VERSION 3.13)
+
+include(../cmake/StandardProjectSettings.cmake)
+
+find_package(arcus REQUIRED)
+
+add_executable(test test.cpp)
+set_project_standards(test)
+set_project_warnings(test)
+use_threads(test)
+
+target_link_libraries(test
+        PUBLIC
+            arcus::arcus
+        )

@@ -131,7 +131,7 @@
 };
 
 %UnitCode
-#include "Types.h"
+#include "Arcus/Types.h"
 %End
 
 namespace SocketState

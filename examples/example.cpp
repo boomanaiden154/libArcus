@@ -2,9 +2,9 @@
 #include <iostream>
 #include <thread>
 
-#include "../src/Socket.h"
-#include "../src/SocketListener.h"
-#include "../src/Error.h"
+#include "Arcus/Socket.h"
+#include "Arcus/SocketListener.h"
+#include "Arcus/Error.h"
 
 #include "example.pb.h"
 

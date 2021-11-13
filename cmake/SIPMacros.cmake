@@ -87,33 +87,25 @@ MACRO(ADD_SIP_PYTHON_MODULE MODULE_NAME MODULE_SIP)
 
     # Suppress warnings
     IF(PEDANTIC)
-      IF(MSVC)
-        # 4996 deprecation warnings (bindings re-export deprecated methods)
-        # 4701 potentially uninitialized variable used (sip generated code)
-        # 4702 unreachable code (sip generated code)
-        ADD_DEFINITIONS( /wd4996 /wd4701 /wd4702 )
-      ELSE(MSVC)
-        # disable all warnings
-        ADD_DEFINITIONS( -w )
-      ENDIF(MSVC)
+        IF(MSVC)
+            # 4996 deprecation warnings (bindings re-export deprecated methods)
+            # 4701 potentially uninitialized variable used (sip generated code)
+            # 4702 unreachable code (sip generated code)
+            ADD_DEFINITIONS( /wd4996 /wd4701 /wd4702 )
+        ELSE(MSVC)
+            # disable all warnings
+            ADD_DEFINITIONS( -w )
+        ENDIF(MSVC)
     ENDIF(PEDANTIC)
 
     ADD_CUSTOM_COMMAND(
-        OUTPUT ${_sip_output_files}
-        COMMAND ${CMAKE_COMMAND} -E echo ${message}
-        COMMAND ${CMAKE_COMMAND} -E touch ${_sip_output_files}
-        COMMAND ${SIP_EXECUTABLE} ${_sip_tags} ${_sip_x} ${SIP_EXTRA_OPTIONS} -j ${SIP_CONCAT_PARTS} -c ${CMAKE_CURRENT_BINARY_DIR}/${_module_path} ${_sip_includes} ${_abs_module_sip}
-        DEPENDS ${_abs_module_sip} ${SIP_EXTRA_FILES_DEPEND}
+            OUTPUT ${_sip_output_files}
+            COMMAND ${CMAKE_COMMAND} -E echo ${message}
+            COMMAND ${CMAKE_COMMAND} -E touch ${_sip_output_files}
+            COMMAND ${SIP_EXECUTABLE} ${_sip_tags} ${_sip_x} ${SIP_EXTRA_OPTIONS} -j ${SIP_CONCAT_PARTS} -c ${CMAKE_CURRENT_BINARY_DIR}/${_module_path} ${_sip_includes} ${_abs_module_sip}
+            DEPENDS ${_abs_module_sip} ${SIP_EXTRA_FILES_DEPEND}
     )
     ADD_LIBRARY(${_logical_name} MODULE ${_sip_output_files} ${SIP_EXTRA_SOURCE_FILES})
-    IF (NOT APPLE)
-        IF ("${Python3_VERSION_MINOR}" GREATER 7)
-            MESSAGE(STATUS "Python > 3.7 - not linking to libpython")
-        ELSE ()
-            TARGET_LINK_LIBRARIES(${_logical_name} ${Python3_LIBRARIES})
-        ENDIF ()
-    ENDIF (NOT APPLE)
-    TARGET_LINK_LIBRARIES(${_logical_name} ${EXTRA_LINK_LIBRARIES})
     IF (APPLE)
         SET_TARGET_PROPERTIES(${_logical_name} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
     ENDIF (APPLE)

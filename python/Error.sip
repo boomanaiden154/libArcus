@@ -40,8 +40,9 @@ namespace ErrorCode
 class Error
 {
     %TypeHeaderCode
-    #include "Error.h"
-    %End
+    #include "Arcus/Error.h"
+
+%End
 
 public:
     Error();
