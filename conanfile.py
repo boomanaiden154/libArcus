@@ -111,9 +111,9 @@ class ArcusConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
         if self.in_local_cache:
-            self.runenv_info.prepend_path("PYTHONPATH", os.path.join(self.folders.package, "site-packages"))
+            self.runenv_info.prepend_path("PYTHONPATH", os.path.join(self.package_folder, "site-packages"))
         else:
-            self.runenv_info.prepend_path("PYTHONPATH", self.folders.build)
+            self.runenv_info.prepend_path("PYTHONPATH", self.build_folder)
 
     def package_id(self):
         self.info.requires.full_version_mode()
