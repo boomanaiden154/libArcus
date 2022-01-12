@@ -1,0 +1,6 @@
+[build-system]
+requires = ["sip >=5, <7"]
+build-backend = "sipbuild.api"
+
+[tool.sip.metadata]
+name = "@module_name_toml@"

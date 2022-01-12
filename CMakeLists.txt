@@ -42,7 +42,7 @@ if(BUILD_PYTHON)
         set(LIB_SUFFIX "")
     endif()
 
-    include_directories(python/ src/ ${SIP_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS})
+    include_directories(python/ src/ ${Python3_INCLUDE_DIRS})
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
@@ -98,9 +98,15 @@ if(MSVC_STATIC_RUNTIME)
 endif()
 
 if(BUILD_PYTHON)
-    set(SIP_EXTRA_FILES_DEPEND python/SocketListener.sip python/Types.sip python/PythonMessage.sip python/Error.sip)
+    file(COPY python/SocketListener.sip DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY python/Types.sip DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY python/PythonMessage.sip DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY python/Error.sip DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY python/Socket.sip DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY python/PythonMessage.cpp DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src)
+    file(COPY python/PythonMessage.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src)
+    SET(SIP_INCLUDES ${CMAKE_CURRENT_BINARY_DIR})
     set(SIP_EXTRA_SOURCE_FILES python/PythonMessage.cpp)
-    set(SIP_EXTRA_OPTIONS -g -n PyQt5.sip) # -g means always release the GIL before calling C++ methods. -n PyQt5.sip is required to not get the PyCapsule error
     add_sip_python_module(Arcus python/Socket.sip Arcus)
 endif()
 

@@ -41,7 +41,11 @@ SET(SIP_CONCAT_PARTS 8)
 SET(SIP_DISABLE_FEATURES)
 SET(SIP_EXTRA_OPTIONS)
 
+find_file(sip_generate "sip-generate.py" PATHS ${CMAKE_MODULE_PATH})
+find_file(pyproject_toml "pyproject.toml.in" PATHS ${CMAKE_MODULE_PATH})
+
 MACRO(ADD_SIP_PYTHON_MODULE MODULE_NAME MODULE_SIP)
+    GET_FILENAME_COMPONENT(module_name_toml ${MODULE_SIP} NAME_WE)
 
     SET(EXTRA_LINK_LIBRARIES ${ARGN})
 
@@ -77,13 +81,25 @@ MACRO(ADD_SIP_PYTHON_MODULE MODULE_NAME MODULE_SIP)
         LIST(APPEND _sip_x -x ${_x})
     ENDFOREACH (_x ${SIP_DISABLE_FEATURES})
 
+    set(CMAKE_CURRENT_SIP_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/_tmp")
+
     SET(_message "-DMESSAGE=Generating CPP code for module ${MODULE_NAME}")
     SET(_sip_output_files)
     FOREACH(CONCAT_NUM RANGE 0 ${SIP_CONCAT_PARTS} )
         IF( ${CONCAT_NUM} LESS ${SIP_CONCAT_PARTS} )
-            SET(_sip_output_files ${_sip_output_files} ${CMAKE_CURRENT_BINARY_DIR}/${_module_path}/sip${_child_module_name}part${CONCAT_NUM}.cpp )
+	    SET(_sip_output_files ${_sip_output_files} ${CMAKE_CURRENT_SIP_OUTPUT_DIR}/${_child_module_name}/sip${_child_module_name}part${CONCAT_NUM}.cpp )
         ENDIF( ${CONCAT_NUM} LESS ${SIP_CONCAT_PARTS} )
     ENDFOREACH(CONCAT_NUM RANGE 0 ${SIP_CONCAT_PARTS} )
+    SET(_sip_output_files ${_sip_output_files} ${CMAKE_CURRENT_SIP_OUTPUT_DIR}/${_child_module_name}/apiversions.c)
+    SET(_sip_output_files ${_sip_output_files} ${CMAKE_CURRENT_SIP_OUTPUT_DIR}/${_child_module_name}/array.c)
+    SET(_sip_output_files ${_sip_output_files} ${CMAKE_CURRENT_SIP_OUTPUT_DIR}/${_child_module_name}/bool.cpp)
+    SET(_sip_output_files ${_sip_output_files} ${CMAKE_CURRENT_SIP_OUTPUT_DIR}/${_child_module_name}/descriptors.c)
+    SET(_sip_output_files ${_sip_output_files} ${CMAKE_CURRENT_SIP_OUTPUT_DIR}/${_child_module_name}/int_convertors.c)
+    SET(_sip_output_files ${_sip_output_files} ${CMAKE_CURRENT_SIP_OUTPUT_DIR}/${_child_module_name}/objmap.c)
+    SET(_sip_output_files ${_sip_output_files} ${CMAKE_CURRENT_SIP_OUTPUT_DIR}/${_child_module_name}/qtlib.c)
+    SET(_sip_output_files ${_sip_output_files} ${CMAKE_CURRENT_SIP_OUTPUT_DIR}/${_child_module_name}/siplib.c)
+    SET(_sip_output_files ${_sip_output_files} ${CMAKE_CURRENT_SIP_OUTPUT_DIR}/${_child_module_name}/threads.c)
+    SET(_sip_output_files ${_sip_output_files} ${CMAKE_CURRENT_SIP_OUTPUT_DIR}/${_child_module_name}/voidptr.c)
 
     # Suppress warnings
     IF(PEDANTIC)
@@ -98,12 +114,17 @@ MACRO(ADD_SIP_PYTHON_MODULE MODULE_NAME MODULE_SIP)
       ENDIF(MSVC)
     ENDIF(PEDANTIC)
 
+    CONFIGURE_FILE(
+        ${pyproject_toml}
+	${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml
+    )
+
     ADD_CUSTOM_COMMAND(
         OUTPUT ${_sip_output_files}
         COMMAND ${CMAKE_COMMAND} -E echo ${message}
-        COMMAND ${CMAKE_COMMAND} -E touch ${_sip_output_files}
-        COMMAND ${SIP_EXECUTABLE} ${_sip_tags} ${_sip_x} ${SIP_EXTRA_OPTIONS} -j ${SIP_CONCAT_PARTS} -c ${CMAKE_CURRENT_BINARY_DIR}/${_module_path} ${_sip_includes} ${_abs_module_sip}
-        DEPENDS ${_abs_module_sip} ${SIP_EXTRA_FILES_DEPEND}
+	COMMAND ${PYTHON_EXECUTABLE} ${sip_generate} --build-dir ${CMAKE_CURRENT_SIP_OUTPUT_DIR} --target-dir ${PYTHON_SITE_PACKAGES_INSTALL_DIR}/${_parent_module_path} --concatenate ${SIP_CONCAT_PARTS}
+	COMMAND touch ${_sip_output_files}
+	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml
     )
     ADD_LIBRARY(${_logical_name} MODULE ${_sip_output_files} ${SIP_EXTRA_SOURCE_FILES})
     IF (NOT APPLE)
